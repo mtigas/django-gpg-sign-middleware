@@ -32,7 +32,7 @@ setup(name="django-gpg-sign-middleware",
       maintainer="Mike Tigas",
       version="0.1.0",
       packages=["gpgsign"],
-      license="GNU Affero General Public License v3 or later (AGPLv3+)"
+      license="GNU Affero General Public License v3 or later (AGPLv3+)",
       url='https://github.com/mtigas/django-gpg-sign-middleware',
       classifiers=[
           'Development Status :: 3 - Alpha',

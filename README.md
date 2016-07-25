@@ -4,16 +4,35 @@ A Django middleware that GPG signs entire HTML pages, hidden from most users
 by stashing the PGP "clearsign" header/footer bits
 (`BEGIN PGP SIGNED MESSAGE` and `BEGIN PGP SIGNATURE` and etc) in HTML comments.
 
-Requires an installation of [GnuPG](https://www.gnupg.org/); uses
-isislovecruft's [python-gnupg fork](https://github.com/isislovecruft/python-gnupg).
+© 2016 Mike Tigas. Licensed under the [GNU Affero General Public License v3 or later](LICENSE.md).
+
+---
 
 Very roughly extracted from some of the stuff that powers
 [my site](https://mike.tig.as/). (See also: [site colophon](https://mike.tig.as/colophon/),
 [django-medusa](https://github.com/mtigas/django-medusa/))
 
+Requires an installation of [GnuPG](https://www.gnupg.org/); uses
+isislovecruft's [python-gnupg fork](https://github.com/isislovecruft/python-gnupg).
+Has only been tested with Django 1.4.
 
-© 2016 Mike Tigas. Licensed under the [GNU Affero General Public License v3 or later](LICENSE.md).
+There is a non-zero chance that this is a pointless or bad idea,
+but it was a fun random thing to throw together over an evening. If you worry
+that you can't trust the hosting or transmission of my website (even over
+HTTPS or strongly-authenticated [Tor onion services](http://tigas3l7uusztiqu.onion/)),
+and after all of that you still trust my PGP key, then you can be certain
+that my HTML pages are still legit. Or something like that.
 
+**Important**: This is also essentialy useless in a normal server-side Django
+installation; to ensure safety of your PGP key, minimize CPU load (and denial
+of service risk), and the ability to actually serve pages if you have a key
+passphrase, you'll need to couple this with something that "bakes" your site
+into a static HTML form -- like
+[django-medusa](https://github.com/mtigas/django-medusa/) (as used on my site),
+or anything similar like [django-bakery](https://github.com/datadesk/django-bakery/)).
+This way, PGP signing only happens locally, during the task that generates your
+static site -- and you get the benefit of having `gpg-agent` cache your
+passphrase for the duration of the static site generation process.
 
 # Installation
 
@@ -47,11 +66,18 @@ above the other middleware.
 
 ---
 
-The following values should also exist in your settings:
+## Configuration
 
+In your `settings.py` file, this middleware uses the following options:
+
+    # You should set these.
     GNUPG_HOME = '/home/mtigas/.gnupg'
     GNUPG_BINARY = '/usr/local/bin/gpg2'
     GNUPG_IDENTITY = '4034E60AA7827C5DF21A89AAA993E7156E0E9923'
+
+    # These are essentially optional
+    GNUPG_HEADER_MESSAGE = None
+    GNUPG_PATH_FILTER = lambda path: True
 
 * **GNUPG_HOME** is akin to the `$GNUPGHOME` environment variable; it is the
   full path to your user `.gnupg` directory. If `GNUPG_HOME` is not set, the
@@ -64,6 +90,29 @@ The following values should also exist in your settings:
   secret key listed here must already exist in the GNUPG_HOME keychain. This
   value may be any keyid format that GPG accepts (`0x6E0E9923`, `6E0E9923`,
   `A993E7156E0E9923`, etc).
+
+* **GNUPG_HEADER_MESSAGE** changes the HTML comment that is displayed at the
+  top of your file, explaining that the page is PGP-signed. See *Example*
+  section below. If `None`, the default is:
+
+  ```
+  u"""This page content is PGP-signed until the final \"END PGP SIGNATURE\" line.
+
+  You can verify this page by running `curl $THIS_URL | gpg`
+  or by copying-and-pasting this entire source into PGP or something similar.
+  This page is signed with the following PGP key:
+  {identity}"""
+  ```
+
+  If you use the `{identity}` variable in your message, it is expanded into the
+  value of `GNUPG_IDENTITY`, using `str.format()`.
+
+* **GNUPG_PATH_FILTER**: A function that receives one argument, representing
+  `request.path` inside the middleware `process_response()` method. The function
+  defined here must return `True` or `False`; paths returning `False` will not
+  be signed by this middleware. This allows you to write whitelists/blacklists
+  if you do not want to sign every `text/html` response. The default
+  GNUPG_PATH_FILTER always returns `True`.
 
 ## Example
 
@@ -128,3 +177,5 @@ eS+QuWWb7zHH8jUH3m/89OpP0WWyXHsxYzejyUKdxVeqdKJQ7L7/ZPAIyFL8Trgc
 
 * You may have some issues with passphrase prompts if `gpg-agent` is set to
   immediately forget your secret key passphrase.
+* If you run this on a server and the PGP key has a passphrase, you're gonna
+  have a bad time.
