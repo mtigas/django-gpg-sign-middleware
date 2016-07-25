@@ -16,23 +16,38 @@ Requires an installation of [GnuPG](https://www.gnupg.org/); uses
 isislovecruft's [python-gnupg fork](https://github.com/isislovecruft/python-gnupg).
 Has only been tested with Django 1.4.
 
+---
+
 There is a non-zero chance that this is a pointless or bad idea,
-but it was a fun random thing to throw together over an evening. If you worry
+but it was a fun random thing to throw together over a few days. If you worry
 that you can't trust the hosting or transmission of my website (even over
 HTTPS or strongly-authenticated [Tor onion services](http://tigas3l7uusztiqu.onion/)),
 and after all of that you still trust my PGP key, then you can be certain
 that my HTML pages are still legit. Or something like that.
 
-**Important**: This is also essentialy useless in a normal server-side Django
+**Important**: This is also essentially useless in a normal server-side Django
 installation; to ensure safety of your PGP key, minimize CPU load (and denial
 of service risk), and the ability to actually serve pages if you have a key
-passphrase, you'll need to couple this with something that "bakes" your site
-into a static HTML form -- like
-[django-medusa](https://github.com/mtigas/django-medusa/) (as used on my site),
-or anything similar like [django-bakery](https://github.com/datadesk/django-bakery/)).
-This way, PGP signing only happens locally, during the task that generates your
-static site -- and you get the benefit of having `gpg-agent` cache your
-passphrase for the duration of the static site generation process.
+passphrase, **you probably need to couple this with something that "bakes" your
+site into a static HTML form** -- like
+[django-medusa](https://github.com/mtigas/django-medusa/).
+Generating your site statically ahead of time doesn't expose your PGP key
+to would-be server attackers, and allows you to verify page integrity across
+mirrors or other distribution mechanisms (like local area meshnets or
+content distributed via sneakernet or etc).
+
+**Why not detached signatures or something in HTTP headers or etc?** Mostly out
+of laziness: doing it this way allows a simple `curl $URL | gpg` to verify a
+page. It also keeps things simple when serving on a basic static-only web
+server. We also avoid thinking about what to do about things like variant URLs
+where the canonical URL is not a literal _filename_ (i.e. `/blog/` +
+`/blog/index.html`). HTTP headers were avoided, because I wanted this to work
+without a dynamic server-side component for extra metadata like that and
+utilizing HTTP headers would involve more steps for a user to verify page data.
+(Also: questions regarding what format to use, the fact that HTTP headers are
+uncompressed, etc.)
+
+In short: this little experiment might not be for you, use it at your own risk.
 
 # Installation
 
