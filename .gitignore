@@ -1,0 +1,15 @@
+*.pyc
+*.pyo
+.DS_Store
+Thumbs.db
+*.swp
+*.lock
+*~
+*.tmp
+*.bak
+
+Build
+build
+dist
+._*
+*.egg-info
