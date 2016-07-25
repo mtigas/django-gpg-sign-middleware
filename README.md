@@ -4,6 +4,10 @@ A Django middleware that GPG signs entire HTML pages, hidden from most users
 by stashing the PGP "clearsign" header/footer bits
 (`BEGIN PGP SIGNED MESSAGE` and `BEGIN PGP SIGNATURE` and etc) in HTML comments.
 
+Because it uses the GPG `--clearsign` mode, anybody with your public key can
+`curl $URL | gpg` to verify the authenticity of pages generated with this
+middleware.
+
 © 2016 Mike Tigas. Licensed under the [GNU Affero General Public License v3 or later](LICENSE.md).
 
 ---
@@ -15,6 +19,10 @@ Very roughly extracted from some of the stuff that powers
 Requires an installation of [GnuPG](https://www.gnupg.org/); uses
 isislovecruft's [python-gnupg fork](https://github.com/isislovecruft/python-gnupg).
 Has only been tested with Django 1.4.
+
+**Similar tools**:
+* [jekyll-gpg_clearsign](https://github.com/kormoc/jekyll-gpg_clearsign) for
+  Jekyll static sites.
 
 ---
 
@@ -32,9 +40,10 @@ passphrase, **you probably need to couple this with something that "bakes" your
 site into a static HTML form** -- like
 [django-medusa](https://github.com/mtigas/django-medusa/).
 Generating your site statically ahead of time doesn't expose your PGP key
-to would-be server attackers, and allows you to verify page integrity across
-mirrors or other distribution mechanisms (like local area meshnets or
-content distributed via sneakernet or etc).
+to would-be server attackers, and signing at this time (instead of at
+serve-time) allows you to verify page integrity across mirrors or even when
+using alternative distribution mechanisms (like local area meshnets or content
+distributed via torrent or sneakernet or etc).
 
 **Why not detached signatures or something in HTTP headers or etc?** Mostly out
 of laziness: doing it this way allows a simple `curl $URL | gpg` to verify a
