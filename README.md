@@ -24,6 +24,10 @@ Has only been tested with Django 1.4.
 * [jekyll-gpg_clearsign](https://github.com/kormoc/jekyll-gpg_clearsign) for
   Jekyll static sites.
 
+A command-line version is also available in the `cli.py` file. Settings are
+edited within that file. It takes a single filename as input, and prints the
+resulting signed HTML to stdout.
+
 ---
 
 There is a non-zero chance that this is a pointless or bad idea,
