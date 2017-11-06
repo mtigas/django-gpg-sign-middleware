@@ -100,8 +100,8 @@ class GpgSignHtmlMiddleware(object):
 
         if not getattr(settings, "GNUPG_IDENTITY", None):
             raise Exception("Authentication key not yet configured. Please run 'manage.py gpginit' first.")
-        elif not os.path.exists(secring) or not os.path.exists(pubring):
-            raise Exception("The GnuPG public and secret keyrings do not exist.")
+        #elif not os.path.exists(secring) or not os.path.exists(pubring):
+        #    raise Exception("The GnuPG public and secret keyrings do not exist.")
 
         return gnupg.GPG(gpgbin, homedir=gpghome)
 
