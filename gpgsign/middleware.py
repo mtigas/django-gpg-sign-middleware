@@ -112,13 +112,23 @@ class GpgSignHtmlMiddleware(object):
         as signed by the identity configured in `settings.GNUPG_*`.
         """
         gpg = cls.get_gpg()
-        return unicode(gpg.sign(
-            data,
-            default_key=getattr(settings, "GNUPG_IDENTITY", None),
+
+        sign_kwargs = dict(
             clearsign=True,
             detach=False,
             binary=False,
             digest_algo="SHA512"
+        )
+
+        if type(getattr(settings, "GNUPG_IDENTITY", None)) in {list, tuple}:
+            sign_kwargs['default_key'] = None
+            sign_kwargs['multikeys'] = getattr(settings, "GNUPG_IDENTITY", None)
+        else:
+            sign_kwargs['default_key'] = getattr(settings, "GNUPG_IDENTITY", None)
+
+        return unicode(gpg.sign(
+            data,
+            **sign_kwargs
         ))
 
     @classmethod
