@@ -126,6 +126,9 @@ class GpgSignHtmlMiddleware(object):
         else:
             sign_kwargs['default_key'] = getattr(settings, "GNUPG_IDENTITY", None)
 
+        from pprint import pprint
+        pprint(sign_kwargs)
+
         return unicode(gpg.sign(
             data,
             **sign_kwargs
